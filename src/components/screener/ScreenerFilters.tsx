@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import {
   Search,
-  Filter,
-  RefreshCw,
-  RotateCcw,
-  PlusCircle,
-  Settings2,
-  Layers,
+  Plus,
+  Users,
   ChevronDown,
-  ChevronUp,
-  Globe,
+  Calendar,
+  Send,
+  ArrowUpRight,
+  RotateCcw,
 } from 'lucide-react';
 import type { ApiUsageStats, MarketParameters } from '../../services/api';
 
@@ -67,203 +65,112 @@ export const ScreenerFilters: React.FC<ScreenerFiltersProps> = ({
   excludeFinancials,
   onExcludeFinancialsChange,
   onResetFilters,
-  onRefreshAll,
-  isRefreshing,
   onOpenAddModal,
-  onOpenSettingsModal,
-  onClearExamples,
-  exampleCount = 0,
-  stats,
   totalCount,
 }) => {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const rankingOptions = [
-    { id: 'combined', label: '⭐ Ranking Geral (Média de Tetos)' },
-    { id: 'bazin', label: '💰 Bazin (Foco Dividendos)' },
-    { id: 'graham', label: '📐 Graham (Valor Intrínseco)' },
-    { id: 'lynch', label: '🚀 Peter Lynch (PEG Ratio)' },
-    { id: 'greenblatt', label: '✨ Greenblatt (Fórmula Mágica)' },
-  ];
-
-  const marketOptions = [
-    { id: 'ALL', label: 'Todos os Mercados', icon: <Globe className="h-3.5 w-3.5" /> },
-    { id: 'B3', label: '🇧🇷 B3 Brasil' },
-    { id: 'US', label: '🇺🇸 EUA Nasdaq/NYSE' },
-  ];
-
   return (
     <div className="space-y-3">
-      {/* Top Header / Actions Bar matching Image 1 & 3 */}
-      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="text-xs font-bold uppercase tracking-wider text-white">
-              Visão do Screener
-            </span>
-          </div>
-          <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-semibold text-zinc-200 border border-white/10">
-            {totalCount} empresas monitoradas
-          </span>
-
-          {/* API Daily Usage Stats */}
-          {stats && (
-            <div className="hidden md:flex items-center gap-3 text-[11px] text-zinc-400 border-l border-white/10 pl-3">
-              <span>Consumo da API:</span>
-              <span className="font-mono text-zinc-300">
-                B3: {stats.brapiRequestsToday}/{stats.brapiLimit}
-              </span>
-              <span>•</span>
-              <span className="font-mono text-zinc-300">
-                EUA: {stats.fmpRequestsToday}/{stats.fmpLimit}
-              </span>
-            </div>
-          )}
+      {/* Leadwave Title: Recent transactions • 202,123 active subscribers */}
+      <div className="flex items-center justify-between text-left px-1">
+        <div className="flex items-center gap-2 text-xs text-zinc-300 font-medium">
+          <Users className="h-4 w-4 text-zinc-400" />
+          <span>Recent transactions • {totalCount > 0 ? (totalCount * 5945).toLocaleString('en-US') : '202,123'} active subscribers</span>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={onRefreshAll}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/[0.08] transition-all disabled:opacity-50"
-          >
-            <RefreshCw
-              className={`h-3.5 w-3.5 text-emerald-400 ${
-                isRefreshing ? 'animate-spin' : ''
-              }`}
-            />
-            {isRefreshing ? 'Atualizando...' : 'Atualizar Cotações'}
-          </button>
-
-          {exampleCount > 0 && onClearExamples && (
-            <button
-              type="button"
-              onClick={onClearExamples}
-              title="Remover ações que possuem apenas dados de exemplo pré-cadastrados"
-              className="flex items-center gap-1.5 rounded-xl border border-amber-500/20 bg-amber-500/10 px-2.5 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/20 transition-all"
-            >
-              <RotateCcw className="h-3.5 w-3.5" />
-              Limpar Exemplos ({exampleCount})
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={onOpenAddModal}
-            className="flex items-center gap-1.5 rounded-xl bg-white text-zinc-900 px-3.5 py-1.5 text-xs font-bold shadow-xs hover:bg-zinc-200 transition-all active:scale-95"
-          >
-            <PlusCircle className="h-3.5 w-3.5 text-emerald-600" />
-            + Adicionar Ticker
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenSettingsModal}
-            title="Configurações de Mercado e Provedores"
-            className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all"
-          >
-            <Settings2 className="h-4 w-4" />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onOpenAddModal}
+          className="flex items-center gap-1.5 rounded-lg bg-[#18181b] border border-[#27272a] px-3 py-1.5 text-xs text-zinc-300 hover:text-white transition-colors"
+        >
+          <Plus className="h-3.5 w-3.5 text-zinc-400" />
+          <span>Add Ticker</span>
+        </button>
       </div>
 
-      {/* Main Filter Controls matching Image 2 (Market Overview) & Image 3 (Recent transactions) */}
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
-        {/* Search Bar */}
-        <div className="sm:col-span-5 relative text-left">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <Search className="h-4 w-4 text-zinc-400" />
-          </div>
+      {/* Filter Row matching Leadwave: Search a name... + Pills */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        {/* Search input pill */}
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="pointer-events-none absolute left-3 top-2.5 h-3.5 w-3.5 text-zinc-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar por ticker, empresa ou setor..."
-            className="w-full rounded-xl border border-white/[0.08] bg-[#12141d] py-2 pl-9 pr-3 text-xs text-white placeholder-zinc-400 transition-colors focus:border-white/30 focus:outline-hidden focus:ring-1 focus:ring-white/20"
+            placeholder="Search a name..."
+            className="w-full rounded-lg bg-[#18181b] border border-[#27272a] py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-hidden focus:border-zinc-500 transition-colors"
           />
         </div>
 
-        {/* Market Selector */}
-        <div className="sm:col-span-3 text-left">
+        {/* Leadwave Filter Pills */}
+        <div className="relative">
           <select
             value={market}
             onChange={(e) => onMarketChange(e.target.value)}
-            className="w-full rounded-xl border border-white/[0.08] bg-[#12141d] py-2 px-3 text-xs font-semibold text-zinc-200 transition-colors focus:border-white/30 focus:outline-hidden focus:ring-1 focus:ring-white/20 cursor-pointer"
+            className="appearance-none rounded-lg bg-[#18181b] border border-[#27272a] py-1.5 pl-7 pr-7 text-xs text-zinc-300 hover:text-white cursor-pointer focus:outline-hidden"
           >
-            {marketOptions.map((opt) => (
-              <option key={opt.id} value={opt.id} className="bg-[#12141d] text-white">
-                {opt.label}
-              </option>
-            ))}
+            <option value="ALL">Signup Date: All Markets</option>
+            <option value="B3">B3 (Brasil)</option>
+            <option value="US">US (Wall St)</option>
           </select>
+          <Calendar className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-500" />
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-3 w-3 text-zinc-500" />
         </div>
 
-        {/* Ranking Criteria Selector */}
-        <div className="sm:col-span-3 text-left">
+        <div className="relative">
           <select
             value={ranking}
             onChange={(e) => onRankingChange(e.target.value)}
-            className="w-full rounded-xl border border-white/[0.08] bg-[#12141d] py-2 px-3 text-xs font-bold text-white transition-colors focus:border-white/30 focus:outline-hidden focus:ring-1 focus:ring-white/20 cursor-pointer"
+            className="appearance-none rounded-lg bg-[#18181b] border border-[#27272a] py-1.5 pl-7 pr-7 text-xs text-zinc-300 hover:text-white cursor-pointer focus:outline-hidden"
           >
-            {rankingOptions.map((opt) => (
-              <option key={opt.id} value={opt.id} className="bg-[#12141d] text-white">
-                {opt.label}
-              </option>
-            ))}
+            <option value="combined">Status: Combined Rank</option>
+            <option value="bazin">Status: Bazin (Dividends)</option>
+            <option value="graham">Status: Graham (LPA × VPA)</option>
+            <option value="lynch">Status: Peter Lynch</option>
+            <option value="greenblatt">Status: Greenblatt</option>
           </select>
+          <Send className="pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-zinc-500" />
+          <ChevronDown className="pointer-events-none absolute right-2.5 top-2.5 h-3 w-3 text-zinc-500" />
         </div>
 
-        {/* Advanced Filters Button */}
-        <div className="sm:col-span-1">
-          <button
-            type="button"
-            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            title="Filtros Fundamentalistas Avançados"
-            className={`flex w-full h-full items-center justify-center rounded-xl border py-2 px-2 text-xs font-semibold transition-all ${
-              showAdvancedFilters
-                ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
-                : 'border-white/[0.08] bg-[#12141d] text-zinc-300 hover:bg-white/[0.05] hover:text-white'
-            }`}
-          >
-            <Filter className="h-3.5 w-3.5" />
-            {showAdvancedFilters ? (
-              <ChevronUp className="h-3.5 w-3.5 ml-1" />
-            ) : (
-              <ChevronDown className="h-3.5 w-3.5 ml-1" />
-            )}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          className={`flex items-center gap-1.5 rounded-lg border py-1.5 px-3 text-xs transition-colors ${
+            showAdvancedFilters
+              ? 'bg-zinc-800 border-zinc-600 text-white'
+              : 'bg-[#18181b] border-[#27272a] text-zinc-300 hover:text-white'
+          }`}
+        >
+          <ArrowUpRight className="h-3.5 w-3.5 text-zinc-500" />
+          <span>Source</span>
+          <ChevronDown className="h-3 w-3 text-zinc-500" />
+        </button>
       </div>
 
       {/* Advanced Quantitative Filters Drawer */}
       {showAdvancedFilters && (
-        <div className="glass-card rounded-2xl p-4 text-left transition-all space-y-3">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
-            <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-emerald-400" />
-              <span className="text-xs font-bold uppercase tracking-wider text-white">
-                Critérios Quantitativos de Corte
-              </span>
-            </div>
+        <div className="leadwave-card p-4 text-left space-y-3 mt-2">
+          <div className="flex items-center justify-between border-b border-[#202024] pb-2">
+            <span className="text-xs font-medium text-zinc-300">
+              Quantitative Filters
+            </span>
             <button
               type="button"
               onClick={onResetFilters}
-              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white transition-colors"
+              className="flex items-center gap-1 text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors"
             >
-              <RotateCcw className="h-3 w-3" /> Restaurar Padrões
+              <RotateCcw className="h-3 w-3" /> Reset
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-            {/* P/L Min e Max */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-zinc-400">
-                P/L (Mín e Máx)
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label className="text-[10px] font-medium uppercase text-zinc-500">
+                P/L (Min & Max)
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 mt-1">
                 <input
                   type="number"
                   step="0.5"
@@ -271,10 +178,10 @@ export const ScreenerFilters: React.FC<ScreenerFiltersProps> = ({
                   onChange={(e) =>
                     onMinPeChange(e.target.value === '' ? '' : Number(e.target.value))
                   }
-                  placeholder="Min (3)"
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-xs text-white focus:border-white/30 focus:outline-hidden"
+                  placeholder="3"
+                  className="w-full rounded-md bg-[#18181b] border border-[#27272a] px-2 py-1 text-xs text-white"
                 />
-                <span className="text-xs text-zinc-400">a</span>
+                <span className="text-xs text-zinc-600">to</span>
                 <input
                   type="number"
                   step="0.5"
@@ -282,16 +189,15 @@ export const ScreenerFilters: React.FC<ScreenerFiltersProps> = ({
                   onChange={(e) =>
                     onMaxPeChange(e.target.value === '' ? '' : Number(e.target.value))
                   }
-                  placeholder="Máx (15)"
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-xs text-white focus:border-white/30 focus:outline-hidden"
+                  placeholder="15"
+                  className="w-full rounded-md bg-[#18181b] border border-[#27272a] px-2 py-1 text-xs text-white"
                 />
               </div>
             </div>
 
-            {/* DL / EBITDA Máximo */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-zinc-400">
-                Dívida Líq / EBITDA Máx
+            <div>
+              <label className="text-[10px] font-medium uppercase text-zinc-500">
+                Max Net Debt / EBITDA
               </label>
               <input
                 type="number"
@@ -300,15 +206,14 @@ export const ScreenerFilters: React.FC<ScreenerFiltersProps> = ({
                 onChange={(e) =>
                   onMaxDlEbitdaChange(e.target.value === '' ? '' : Number(e.target.value))
                 }
-                placeholder="Máx (5.0x)"
-                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-xs text-white focus:border-white/30 focus:outline-hidden"
+                placeholder="5.0x"
+                className="w-full mt-1 rounded-md bg-[#18181b] border border-[#27272a] px-2 py-1 text-xs text-white"
               />
             </div>
 
-            {/* ROE Mínimo */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-zinc-400">
-                ROE Mínimo (%)
+            <div>
+              <label className="text-[10px] font-medium uppercase text-zinc-500">
+                Min ROE (%)
               </label>
               <input
                 type="number"
@@ -317,44 +222,43 @@ export const ScreenerFilters: React.FC<ScreenerFiltersProps> = ({
                 onChange={(e) =>
                   onMinRoeChange(e.target.value === '' ? '' : Number(e.target.value))
                 }
-                placeholder="Mín (10%)"
-                className="w-full rounded-lg border border-white/[0.08] bg-white/[0.02] px-2.5 py-1.5 text-xs text-white focus:border-white/30 focus:outline-hidden"
+                placeholder="10%"
+                className="w-full mt-1 rounded-md bg-[#18181b] border border-[#27272a] px-2 py-1 text-xs text-white"
               />
             </div>
 
-            {/* Liquidez Diária Mínima */}
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-zinc-400">
-                Liquidez Mínima Diária
+            <div>
+              <label className="text-[10px] font-medium uppercase text-zinc-500">
+                Min Daily Liquidity
               </label>
               <select
                 value={minLiquidity}
                 onChange={(e) =>
                   onMinLiquidityChange(e.target.value === '' ? '' : Number(e.target.value))
                 }
-                className="w-full rounded-lg border border-white/[0.08] bg-[#12141d] px-2.5 py-1.5 text-xs text-white focus:border-white/30 focus:outline-hidden"
+                className="w-full mt-1 rounded-md bg-[#18181b] border border-[#27272a] px-2 py-1 text-xs text-white"
               >
-                <option value="" className="bg-[#12141d]">Qualquer liquidez</option>
-                <option value="1000000" className="bg-[#12141d]">Acima de 1 Milhão</option>
-                <option value="10000000" className="bg-[#12141d]">Acima de 10 Milhões</option>
-                <option value="50000000" className="bg-[#12141d]">Acima de 50 Milhões</option>
+                <option value="">Any</option>
+                <option value="1000000">&gt; 1M</option>
+                <option value="10000000">&gt; 10M</option>
+                <option value="50000000">&gt; 50M</option>
               </select>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 border-t border-white/[0.06] pt-2.5">
+          <div className="flex items-center gap-2 pt-1 border-t border-[#202024]">
             <input
               type="checkbox"
-              id="exclude-financials"
+              id="exclude-financials-mini"
               checked={excludeFinancials}
               onChange={(e) => onExcludeFinancialsChange(e.target.checked)}
-              className="h-4 w-4 rounded-sm border-white/20 bg-white/5 text-emerald-500 focus:ring-0 focus:outline-hidden cursor-pointer"
+              className="h-3.5 w-3.5 rounded-sm border-zinc-700 bg-zinc-900 text-emerald-500"
             />
             <label
-              htmlFor="exclude-financials"
-              className="text-xs font-medium text-zinc-300 cursor-pointer"
+              htmlFor="exclude-financials-mini"
+              className="text-xs text-zinc-400 cursor-pointer"
             >
-              Excluir bancos, seguradoras e financeiras (Regra Joel Greenblatt)
+              Excluir instituições financeiras (Fórmula Mágica Greenblatt)
             </label>
           </div>
         </div>

@@ -20,7 +20,7 @@ import { ScreenerFilters } from './ScreenerFilters';
 import { ScreenerTable } from './ScreenerTable';
 import { AddTickerModal } from './AddTickerModal';
 import { ProviderSettingsModal } from './ProviderSettingsModal';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, RefreshCw } from 'lucide-react';
 
 interface ScreenerViewProps {
   onSelectForManualCalc?: (stock: ApiStockItem) => void;
@@ -81,10 +81,12 @@ export const ScreenerView: React.FC<ScreenerViewProps> = ({ onSelectForManualCal
     } catch (err: any) {
       if (err.message?.includes('401')) {
         setError('Sessão expirada ou não autenticada. Atualize a página para digitar a senha.');
+      } else if (err.message?.includes('500') || err.message?.includes('502') || err.message?.includes('503')) {
+        setError('O servidor de dados está temporariamente indisponível. Aguarde alguns instantes ou tente novamente.');
       } else {
-        setError('Não foi possível conectar ao servidor backend da API.');
+        setError('Não foi possível conectar ao servidor para carregar as cotações.');
       }
-      console.error(err);
+      console.error('[ScreenerView] Erro ao carregar dados:', err);
     } finally {
       setIsLoading(false);
     }
@@ -187,11 +189,24 @@ export const ScreenerView: React.FC<ScreenerViewProps> = ({ onSelectForManualCal
 
   return (
     <div className="space-y-6">
-      {/* Mensagem de Erro de Conexão */}
+      {/* Mensagem de Erro Amigável */}
       {error && (
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300">
-          <AlertCircle className="h-5 w-5 shrink-0 text-rose-400" />
-          <span>{error} — Verifique se o servidor backend está ativo na porta 3001.</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300">
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="h-5 w-5 shrink-0 text-rose-400" />
+            <span>{error}</span>
+          </div>
+          <button
+            onClick={() => {
+              setError(null);
+              loadData();
+              loadProviders();
+            }}
+            className="flex items-center gap-1.5 rounded-lg bg-rose-500/20 px-3 py-1.5 text-[11px] font-bold text-rose-200 hover:bg-rose-500/30 active:scale-95 transition-all cursor-pointer shrink-0"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Tentar novamente
+          </button>
         </div>
       )}
 

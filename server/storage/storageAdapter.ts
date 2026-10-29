@@ -272,16 +272,28 @@ class LocalOrMemoryStorageAdapter implements StorageAdapter {
  * 2. Chave: SUPABASE_SECRET_KEY ou SUPABASE_SERVICE_ROLE_KEY (bypassa RLS) ou SUPABASE_ANON_KEY
  */
 export function createStorageAdapter(): StorageAdapter {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey =
+  const rawUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const rawKey =
     process.env.SUPABASE_SECRET_KEY ||
     process.env.SUPABASE_SERVICE_ROLE_KEY ||
     process.env.SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (supabaseUrl && supabaseKey) {
-    console.log('[StorageAdapter] Utilizando Supabase como armazenamento externo.');
-    return new SupabaseStorageAdapter(supabaseUrl, supabaseKey);
+  if (rawUrl && rawKey) {
+    const trimmedUrl = rawUrl.trim();
+    const trimmedKey = rawKey.trim();
+
+    // Valida se a URL é HTTP/HTTPS para evitar que strings como 'postgres://' quebrem o createClient
+    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
+      try {
+        console.log('[StorageAdapter] Utilizando Supabase como armazenamento externo.');
+        return new SupabaseStorageAdapter(trimmedUrl, trimmedKey);
+      } catch (e) {
+        console.error('[StorageAdapter] Erro ao instanciar SupabaseClient, usando fallback em memória:', e);
+      }
+    } else {
+      console.warn('[StorageAdapter] SUPABASE_URL não é uma URL HTTP/HTTPS válida. Usando fallback em memória.');
+    }
   }
 
   console.log('[StorageAdapter] Utilizando Adaptador Local / Memória (Fallback).');

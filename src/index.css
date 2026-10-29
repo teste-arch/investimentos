@@ -6,54 +6,48 @@
   html {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color-scheme: dark;
+    background-color: #0e0e11;
   }
 
   body {
     min-height: 100vh;
     overflow-x: hidden;
-    background-color: #090a0f;
-    color: #f1f5f9;
+    background-color: #0e0e11;
+    color: #e4e4e7;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Custom dark scrollbar matching modern dashboard */
+  /* Ultra-minimalist custom scrollbars */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.18);
   }
 }
 
-/* Glassmorphism and ambient glow utilities */
-.glass-panel {
-  background: rgba(18, 20, 29, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+/* Minimalist Leadwave Card Tokens */
+.leadwave-card {
+  background-color: #161619;
+  border: 1px solid #202024;
+  border-radius: 16px;
 }
 
-.glass-card {
-  background: #12141d;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+.leadwave-sidebar {
+  background-color: #111113;
+  border-right: 1px solid #1c1c20;
 }
 
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.ambient-glow {
-  position: absolute;
-  pointer-events: none;
-  filter: blur(80px);
-  opacity: 0.15;
-  border-radius: 9999px;
+.leadwave-input {
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  border-radius: 10px;
 }

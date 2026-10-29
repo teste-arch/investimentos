@@ -30,11 +30,19 @@ function getClientIp(req: Request): string {
  * Informa ao frontend se a proteção por senha está ativa no servidor
  */
 authRouter.get('/status', (_req: Request, res: Response) => {
-  const isProtected = !!process.env.SITE_PASSWORD && process.env.SITE_PASSWORD.trim().length > 0;
-  res.json({
-    success: true,
-    isProtected,
-  });
+  try {
+    const isProtected = !!process.env.SITE_PASSWORD && process.env.SITE_PASSWORD.trim().length > 0;
+    res.json({
+      success: true,
+      isProtected,
+    });
+  } catch (err: any) {
+    console.error('[Auth Status Error]:', err);
+    res.json({
+      success: true,
+      isProtected: false,
+    });
+  }
 });
 
 /**

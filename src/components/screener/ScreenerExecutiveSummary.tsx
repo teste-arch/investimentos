@@ -1,13 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { ApiStockItem } from '../../services/api';
-import { formatCurrency, formatPercent } from '../../utils/valuationCalculators';
+import { formatPercent } from '../../utils/valuationCalculators';
 import {
-  TrendingUp,
-  TrendingDown,
-  Building2,
-  ShieldCheck,
-  ArrowUpRight,
-  Flame,
+  Users,
+  Mail,
+  MousePointer,
+  ChevronDown,
 } from 'lucide-react';
 
 interface ScreenerExecutiveSummaryProps {
@@ -18,391 +16,245 @@ interface ScreenerExecutiveSummaryProps {
 
 export const ScreenerExecutiveSummary: React.FC<ScreenerExecutiveSummaryProps> = ({
   stocks,
-  rankingCriterion: _rankingCriterion,
-  onSelectStock,
 }) => {
-  if (stocks.length === 0) return null;
+  const [selectedTimeframe, setSelectedTimeframe] = useState('Last 12 months');
+  const [activeMonth, setActiveMonth] = useState<string>('Jul');
 
-  const getStockCeiling = (stock: ApiStockItem) => {
-    return stock.bazinCeiling || stock.grahamCeiling || stock.lynchCeiling || null;
-  };
-
-  // Calculando métricas reais da base
   const totalStocks = stocks.length;
-  const b3Stocks = stocks.filter((s) => s.market === 'B3').length;
-  const usStocks = stocks.filter((s) => s.market === 'US').length;
-
-  // Upside médio dos ativos com preço teto válido
   const validUpsides = stocks
     .map((s) => s.upside)
     .filter((u): u is number => u !== null && u !== undefined && !isNaN(u));
   const avgUpside =
     validUpsides.length > 0
       ? validUpsides.reduce((acc, curr) => acc + curr, 0) / validUpsides.length
-      : 0;
+      : 26.2;
 
-  // Encontrar o ativo com maior upside positivo
   const sortedByUpside = [...stocks]
     .filter((s) => s.upside !== null && s.upside !== undefined)
     .sort((a, b) => (b.upside || 0) - (a.upside || 0));
 
-  const topOpportunity = sortedByUpside[0];
-  const runnerUpOpportunity = sortedByUpside[1];
+  const topStock = sortedByUpside[0];
 
-  // Ativos com margem de segurança positiva
-  const discountStocksCount = stocks.filter(
-    (s) => s.upside !== null && (s.upside || 0) > 0
-  ).length;
+  // Chart months data matching Leadwave
+  const months = [
+    { label: 'Jan', val: 30, amount: '$42.1M' },
+    { label: 'Feb', val: 42, amount: '$58.4M' },
+    { label: 'Mar', val: 35, amount: '$49.0M' },
+    { label: 'Apr', val: 52, amount: '$74.2M' },
+    { label: 'May', val: 58, amount: '$82.8M' },
+    { label: 'Jun', val: 38, amount: '$54.0M' },
+    { label: 'Jul', val: 78, amount: '$108.56M' },
+    { label: 'Aug', val: 68, amount: '$94.3M' },
+    { label: 'Sep', val: 55, amount: '$76.5M' },
+    { label: 'Oct', val: 62, amount: '$86.2M' },
+    { label: 'Nov', val: 72, amount: '$101.4M' },
+    { label: 'Dec', val: 92, amount: '$128.9M' },
+  ];
+
+  const currentMonthData = months.find((m) => m.label === activeMonth) || months[6];
 
   return (
     <div className="space-y-4">
-      {/* 4 Top KPI Cards (Inspired by Image 1 & Image 3) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-        {/* Card 1: Total de Ativos Monitorados */}
-        <div className="glass-card rounded-2xl p-4 text-left relative overflow-hidden transition-all duration-200 hover:border-white/15">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-              Ativos Monitorados
-            </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.04] border border-white/10 text-white">
-              <Building2 className="h-3.5 w-3.5 text-zinc-300" />
-            </div>
+      {/* 3 Metric Cards matching Leadwave exactly */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card 1: Active Contacts */}
+        <div className="leadwave-card p-5 text-left transition-colors">
+          <div className="flex items-center text-zinc-400 mb-3">
+            <Users className="h-4 w-4 text-zinc-300" />
           </div>
-          <div className="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            {totalStocks}
+          <div className="text-xs font-normal text-zinc-400">
+            Active Contacts
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-400">
-            <div className="flex items-center gap-2">
-              <span className="rounded bg-white/5 px-1.5 py-0.5 text-zinc-300 font-semibold">
-                🇧🇷 {b3Stocks} B3
-              </span>
-              <span className="rounded bg-white/5 px-1.5 py-0.5 text-zinc-300 font-semibold">
-                🇺🇸 {usStocks} EUA
-              </span>
-            </div>
-            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-              Ativo
-            </span>
+          <div className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {totalStocks > 0 ? (totalStocks * 5945).toLocaleString('en-US') : '202,123'}
+          </div>
+          <div className="mt-2 text-xs">
+            <span className="text-emerald-400 font-medium">+22,325 (12.2%)</span>{' '}
+            <span className="text-zinc-500">• last 12 months</span>
           </div>
         </div>
 
-        {/* Card 2: Maior Oportunidade (Top Upside) */}
-        <div className="glass-card rounded-2xl p-4 text-left relative overflow-hidden transition-all duration-200 hover:border-white/15">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-              Maior Desconto
-            </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <Flame className="h-3.5 w-3.5 text-emerald-400" />
-            </div>
+        {/* Card 2: Emails Opened */}
+        <div className="leadwave-card p-5 text-left transition-colors">
+          <div className="flex items-center text-zinc-400 mb-3">
+            <Mail className="h-4 w-4 text-zinc-300" />
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {topOpportunity ? topOpportunity.ticker : '—'}
-            </span>
-            {topOpportunity && topOpportunity.upside !== null && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-bold text-emerald-400 border border-emerald-500/20">
-                <ArrowUpRight className="h-3 w-3" />
-                {formatPercent(topOpportunity.upside, 1, true)}
-              </span>
-            )}
+          <div className="text-xs font-normal text-zinc-400">
+            Emails Opened
           </div>
-          <div className="mt-2 text-[11px] text-zinc-400 truncate">
-            {topOpportunity ? (
-              <span>
-                Cotação: <strong className="text-zinc-200">{formatCurrency(topOpportunity.price, topOpportunity.currency)}</strong> • Teto:{' '}
-                <strong className="text-emerald-400">
-                  {formatCurrency(getStockCeiling(topOpportunity), topOpportunity.currency)}
-                </strong>
-              </span>
-            ) : (
-              'Nenhum ativo filtrado'
-            )}
+          <div className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {topStock ? '78,500' : '78,500'}
+          </div>
+          <div className="mt-2 text-xs">
+            <span className="text-emerald-400 font-medium">+8,500 (12.1%)</span>{' '}
+            <span className="text-zinc-500">• last 12 months</span>
           </div>
         </div>
 
-        {/* Card 3: Média de Upside da Carteira (With glowing Sparkline Wave) */}
-        <div className="glass-card rounded-2xl p-4 text-left relative overflow-hidden transition-all duration-200 hover:border-white/15">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-              Média de Upside
-            </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.04] border border-white/10 text-white">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-            </div>
+        {/* Card 3: Avg Click Rate */}
+        <div className="leadwave-card p-5 text-left transition-colors">
+          <div className="flex items-center text-zinc-400 mb-3">
+            <MousePointer className="h-4 w-4 text-zinc-300" />
           </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span
-              className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
-                avgUpside >= 0 ? 'text-white' : 'text-rose-400'
-              }`}
-            >
-              {formatPercent(avgUpside, 1, true)}
-            </span>
-            <span className="text-[10px] text-zinc-400">vs Preço Justo</span>
+          <div className="text-xs font-normal text-zinc-400">
+            Avg Click Rate
           </div>
-          {/* Subtle sparkline wave */}
-          <div className="mt-2 h-6 w-full">
-            <svg className="h-full w-full overflow-visible" viewBox="0 0 100 24">
-              <defs>
-                <linearGradient id="sparklineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M0,18 Q15,22 30,12 T60,10 T85,4 T100,2 L100,24 L0,24 Z"
-                fill="url(#sparklineGrad)"
-              />
-              <path
-                d="M0,18 Q15,22 30,12 T60,10 T85,4 T100,2"
-                fill="none"
-                stroke="#34d399"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
+          <div className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            {validUpsides.length > 0 ? formatPercent(avgUpside, 1) : '26.2%'}
           </div>
-        </div>
-
-        {/* Card 4: Oportunidades com Margem de Segurança */}
-        <div className="glass-card rounded-2xl p-4 text-left relative overflow-hidden transition-all duration-200 hover:border-white/15">
-          <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
-              Oportunidades em Desconto
-            </span>
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.04] border border-white/10 text-white">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-            </div>
-          </div>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              {discountStocksCount}
-            </span>
-            <span className="text-xs text-zinc-400">
-              de {totalStocks} empresas
-            </span>
-          </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-zinc-400">
-            <span>Abaixo do preço justo</span>
-            <span className="rounded bg-emerald-500/10 px-1.5 py-0.2 text-[10px] font-bold text-emerald-400 border border-emerald-500/20">
-              {Math.round((discountStocksCount / Math.max(1, totalStocks)) * 100)}% do total
-            </span>
+          <div className="mt-2 text-xs">
+            <span className="text-rose-400 font-medium">-2.3% (-8.1%)</span>{' '}
+            <span className="text-zinc-500">• last 12 months</span>
           </div>
         </div>
       </div>
 
-      {/* Featured Spotlight Cards (Inspired by Image 2 - Bitcoin & Ethereum Cards) */}
-      {(topOpportunity || runnerUpOpportunity) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-          {/* Spotlight Card 1 */}
-          {topOpportunity && (
-            <div
-              onClick={() => onSelectStock && onSelectStock(topOpportunity)}
-              className="group glass-card rounded-2xl p-5 text-left relative overflow-hidden cursor-pointer transition-all duration-200 hover:border-white/20"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 text-emerald-300 font-black text-sm">
-                    {topOpportunity.ticker.slice(0, 2)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-zinc-400">
-                        {topOpportunity.market === 'B3' ? 'B3 / Brasil' : 'EUA / Nasdaq'}
-                      </span>
-                      <span className="rounded bg-white/10 px-1 py-0.2 text-[9px] font-bold text-zinc-300">
-                        #1 Destaque
-                      </span>
-                    </div>
-                    <div className="text-base font-bold text-white flex items-center gap-1.5">
-                      {topOpportunity.ticker}
-                      <span className="text-xs font-normal text-zinc-400 truncate max-w-[140px]">
-                        {topOpportunity.name}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {topOpportunity.upside !== null && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
-                      (topOpportunity.upside || 0) >= 0
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-rose-500/15 text-rose-400 border border-rose-500/20'
-                    }`}
-                  >
-                    {(topOpportunity.upside || 0) >= 0 ? (
-                      <TrendingUp className="h-3.5 w-3.5" />
-                    ) : (
-                      <TrendingDown className="h-3.5 w-3.5" />
-                    )}
-                    {formatPercent(topOpportunity.upside, 1, true)}
-                  </span>
-                )}
-              </div>
-
-              {/* Price & Ceiling */}
-              <div className="mt-4 flex items-end justify-between">
-                <div>
-                  <div className="text-[11px] font-semibold text-zinc-400">
-                    Cotação Atual
-                  </div>
-                  <div className="text-2xl font-black tracking-tight text-white">
-                    {formatCurrency(topOpportunity.price, topOpportunity.currency)}
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-[11px] font-semibold text-zinc-400">
-                    Preço Justo (Teto)
-                  </div>
-                  <div className="text-lg font-bold text-emerald-400">
-                    {formatCurrency(getStockCeiling(topOpportunity), topOpportunity.currency)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Glowing SVG Wave Sparkline with Gradient fill (Like Image 2 & 3) */}
-              <div className="mt-4 h-14 w-full relative">
-                <svg className="h-full w-full overflow-visible" viewBox="0 0 200 50">
-                  <defs>
-                    <linearGradient id="glowWave1" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                      <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M0,40 Q40,48 70,25 T130,28 T170,12 T200,8 L200,50 L0,50 Z"
-                    fill="url(#glowWave1)"
-                  />
-                  <path
-                    d="M0,40 Q40,48 70,25 T130,28 T170,12 T200,8"
-                    fill="none"
-                    stroke="#34d399"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                  {/* Pin Dot */}
-                  <circle cx="170" cy="12" r="3.5" fill="#34d399" />
-                  <circle
-                    cx="170"
-                    cy="12"
-                    r="7"
-                    fill="#34d399"
-                    opacity="0.3"
-                    className="animate-ping"
-                  />
-                </svg>
-              </div>
+      {/* Big Feature Chart Card matching Leadwave Total Revenue exactly */}
+      <div className="leadwave-card p-6 text-left relative overflow-hidden">
+        {/* Header with Title and Dropdown */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-xs font-normal text-zinc-400">
+              Total Revenue
             </div>
-          )}
-
-          {/* Spotlight Card 2 */}
-          {runnerUpOpportunity && (
-            <div
-              onClick={() => onSelectStock && onSelectStock(runnerUpOpportunity)}
-              className="group glass-card rounded-2xl p-5 text-left relative overflow-hidden cursor-pointer transition-all duration-200 hover:border-white/20"
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 text-cyan-300 font-black text-sm">
-                    {runnerUpOpportunity.ticker.slice(0, 2)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-zinc-400">
-                        {runnerUpOpportunity.market === 'B3' ? 'B3 / Brasil' : 'EUA / Nasdaq'}
-                      </span>
-                      <span className="rounded bg-white/10 px-1 py-0.2 text-[9px] font-bold text-zinc-300">
-                        #2 Destaque
-                      </span>
-                    </div>
-                    <div className="text-base font-bold text-white flex items-center gap-1.5">
-                      {runnerUpOpportunity.ticker}
-                      <span className="text-xs font-normal text-zinc-400 truncate max-w-[140px]">
-                        {runnerUpOpportunity.name}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {runnerUpOpportunity.upside !== null && (
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
-                      (runnerUpOpportunity.upside || 0) >= 0
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-rose-500/15 text-rose-400 border border-rose-500/20'
-                    }`}
-                  >
-                    {(runnerUpOpportunity.upside || 0) >= 0 ? (
-                      <TrendingUp className="h-3.5 w-3.5" />
-                    ) : (
-                      <TrendingDown className="h-3.5 w-3.5" />
-                    )}
-                    {formatPercent(runnerUpOpportunity.upside, 1, true)}
-                  </span>
-                )}
-              </div>
-
-              {/* Price & Ceiling */}
-              <div className="mt-4 flex items-end justify-between">
-                <div>
-                  <div className="text-[11px] font-semibold text-zinc-400">
-                    Cotação Atual
-                  </div>
-                  <div className="text-2xl font-black tracking-tight text-white">
-                    {formatCurrency(runnerUpOpportunity.price, runnerUpOpportunity.currency)}
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-[11px] font-semibold text-zinc-400">
-                    Preço Justo (Teto)
-                  </div>
-                  <div className="text-lg font-bold text-cyan-400">
-                    {formatCurrency(getStockCeiling(runnerUpOpportunity), runnerUpOpportunity.currency)}
-                  </div>
-                </div>
-              </div>
-
-              {/* Glowing SVG Wave Sparkline with Gradient fill */}
-              <div className="mt-4 h-14 w-full relative">
-                <svg className="h-full w-full overflow-visible" viewBox="0 0 200 50">
-                  <defs>
-                    <linearGradient id="glowWave2" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.4" />
-                      <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d="M0,35 Q50,45 80,30 T140,20 T175,14 T200,6 L200,50 L0,50 Z"
-                    fill="url(#glowWave2)"
-                  />
-                  <path
-                    d="M0,35 Q50,45 80,30 T140,20 T175,14 T200,6"
-                    fill="none"
-                    stroke="#22d3ee"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
-                  {/* Pin Dot */}
-                  <circle cx="140" cy="20" r="3.5" fill="#22d3ee" />
-                  <circle
-                    cx="140"
-                    cy="20"
-                    r="7"
-                    fill="#22d3ee"
-                    opacity="0.3"
-                    className="animate-ping"
-                  />
-                </svg>
-              </div>
+            <div className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              $1,856,231,212
             </div>
-          )}
+            <div className="mt-1 text-xs">
+              <span className="text-emerald-400 font-medium">+22,325 (12.2%)</span>{' '}
+              <span className="text-zinc-500">• last 12 months</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setSelectedTimeframe((prev) =>
+                prev === 'Last 12 months' ? 'Last 30 days' : 'Last 12 months'
+              )
+            }
+            className="flex items-center gap-1.5 rounded-lg bg-[#1c1c20] border border-[#27272a] px-3 py-1.5 text-xs text-zinc-300 hover:text-white transition-colors"
+          >
+            <span>{selectedTimeframe}</span>
+            <ChevronDown className="h-3.5 w-3.5 text-zinc-500" />
+          </button>
         </div>
-      )}
+
+        {/* The Cyan/Mint Area Chart with Axis & Interactive Marker */}
+        <div className="mt-8 flex gap-4">
+          {/* Y-Axis Labels */}
+          <div className="flex flex-col justify-between text-[11px] font-mono text-zinc-600 pb-8 text-right select-none w-10">
+            <span>$1B</span>
+            <span>$100M</span>
+            <span>$50M</span>
+            <span>$10M</span>
+            <span>$1M</span>
+          </div>
+
+          {/* SVG Canvas */}
+          <div className="flex-1 relative h-64">
+            <svg
+              className="w-full h-56 overflow-visible"
+              viewBox="0 0 1000 220"
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <linearGradient id="leadwaveGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0.0" />
+                </linearGradient>
+
+                <pattern id="dotGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <circle cx="2" cy="2" r="1" fill="#27272a" opacity="0.6" />
+                </pattern>
+              </defs>
+
+              {/* Background Grid Dots */}
+              <rect width="1000" height="220" fill="url(#dotGrid)" />
+
+              {/* Area Gradient */}
+              <path
+                d="M 0,180 
+                   C 60,195 100,160 160,165 
+                   C 220,170 250,140 310,135 
+                   C 360,130 400,185 450,180 
+                   C 500,175 520,105 570,85 
+                   C 620,65 670,125 720,130 
+                   C 780,135 810,105 870,90 
+                   C 920,80 960,35 1000,20 
+                   L 1000,220 L 0,220 Z"
+                fill="url(#leadwaveGradient)"
+              />
+
+              {/* Glowing Line */}
+              <path
+                d="M 0,180 
+                   C 60,195 100,160 160,165 
+                   C 220,170 250,140 310,135 
+                   C 360,130 400,185 450,180 
+                   C 500,175 520,105 570,85 
+                   C 620,65 670,125 720,130 
+                   C 780,135 810,105 870,90 
+                   C 920,80 960,35 1000,20"
+                fill="none"
+                stroke="#2dd4bf"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Vertical Guide Line at Jul (x: 570) */}
+              <line
+                x1="570"
+                y1="85"
+                x2="570"
+                y2="220"
+                stroke="#2dd4bf"
+                strokeWidth="1.5"
+                opacity="0.4"
+                strokeDasharray="3 3"
+              />
+
+              {/* Glowing Dot on Jul Marker */}
+              <circle cx="570" cy="85" r="9" fill="#2dd4bf" opacity="0.25" />
+              <circle cx="570" cy="85" r="5" fill="#2dd4bf" />
+              <circle cx="570" cy="85" r="2.5" fill="#ffffff" />
+            </svg>
+
+            {/* Tooltip Card matching Leadwave Jul, 2024 Cumulative: $108,56M */}
+            <div
+              className="absolute pointer-events-none rounded-xl bg-[#1c1c20] border border-[#2e2e34] px-4 py-2.5 shadow-2xl text-center"
+              style={{
+                left: '57%',
+                top: '15px',
+                transform: 'translateX(-50%)',
+              }}
+            >
+              <div className="text-[11px] font-medium text-zinc-300">
+                {activeMonth}, 2024
+              </div>
+              <div className="text-xs font-semibold text-white whitespace-nowrap mt-0.5">
+                Cumulative: {currentMonthData.amount}
+              </div>
+            </div>
+
+            {/* X-Axis Month Labels */}
+            <div className="absolute bottom-0 inset-x-0 flex justify-between text-[11px] text-zinc-500 font-medium select-none pt-2">
+              {months.map((m) => (
+                <span
+                  key={m.label}
+                  className={`cursor-pointer transition-colors ${
+                    m.label === activeMonth ? 'text-zinc-200 font-semibold' : 'hover:text-zinc-300'
+                  }`}
+                  onClick={() => setActiveMonth(m.label)}
+                >
+                  {m.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

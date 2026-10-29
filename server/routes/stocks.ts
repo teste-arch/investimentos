@@ -361,9 +361,17 @@ stocksRouter.post('/params', (req: Request, res: Response) => {
  * GET /api/stocks/providers
  */
 stocksRouter.get('/providers', (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    providers: providerRegistry.listProviders(),
-    stats: cacheManager.getStats(),
-  });
+  try {
+    res.json({
+      success: true,
+      providers: providerRegistry.listProviders(),
+      stats: cacheManager.getStats(),
+    });
+  } catch (err: any) {
+    console.error('[Stocks/Providers Error]:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao consultar status dos provedores de dados.',
+    });
+  }
 });

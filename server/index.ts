@@ -18,10 +18,17 @@ app.use(express.json());
 // Middleware para inicialização assíncrona do cache/armazenamento externo
 let initPromise: Promise<void> | null = null;
 app.use(async (_req, _res, next) => {
-  if (!initPromise) {
-    initPromise = cacheManager.init();
+  try {
+    if (!initPromise) {
+      initPromise = cacheManager.init().catch((err) => {
+        console.error('[CacheManager] Erro ao inicializar cache:', err);
+        initPromise = null;
+      });
+    }
+    await initPromise;
+  } catch (err) {
+    console.error('[Cache Init Middleware Error]:', err);
   }
-  await initPromise;
   next();
 });
 
@@ -31,19 +38,29 @@ app.use('/api/stocks', requireAuth, stocksRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/cron', cronRouter);
 
-// Health check
-app.get('/api/health', (_req, res) => {
+// Health check e Rota Raiz da API
+app.get(['/api', '/api/health'], (_req, res) => {
   res.json({
     status: 'online',
     appName: 'Screener de Valuation API',
     storageType: cacheManager.getStorageType(),
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env.NODE_ENV || 'production',
+  });
+});
+
+// Middleware Global de Tratamento de Erros (Garante resposta JSON amigável)
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('[Express Global Error]:', err);
+  res.status(500).json({
+    success: false,
+    error: 'Ocorreu um erro interno ao processar a requisição no servidor.',
   });
 });
 
 // Se executado diretamente (desenvolvimento local via `npm run server`)
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+// No ambiente Vercel (onde process.env.VERCEL é definido), não chamamos app.listen()
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`[Backend] Screener de Valuation rodando na porta ${PORT}`);
     console.log(`[Backend] API URL: http://localhost:${PORT}/api/stocks`);

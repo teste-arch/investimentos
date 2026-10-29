@@ -10,15 +10,11 @@
   ],
   "rewrites": [
     {
-      "source": "/api/cron",
-      "destination": "/api/cron"
-    },
-    {
       "source": "/api/(.*)",
-      "destination": "/api/index"
+      "destination": "/api"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api).*)",
       "destination": "/index.html"
     }
   ]
