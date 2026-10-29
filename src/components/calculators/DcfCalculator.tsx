@@ -6,7 +6,7 @@ import { InputField } from '../ui/InputField';
 import { MarginSlider } from '../ui/MarginSlider';
 import { ResultDisplay } from '../ui/ResultDisplay';
 import { FormulaCard } from '../ui/FormulaCard';
-import { Sparkles, RotateCcw, Calculator, Layers } from 'lucide-react';
+import { Sparkles, RotateCcw, Layers, Calculator } from 'lucide-react';
 
 interface DcfCalculatorProps {
   currency: Currency;
@@ -14,17 +14,17 @@ interface DcfCalculatorProps {
 
 export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
   const [params, setParams] = useState<DcfParams>({
-    currentFcf: 42000,
-    growthRate5y: 5.0,
-    wacc: 12.5,
-    perpetualGrowth: 3.0,
-    netDebt: 52000,
-    sharesCount: 4500,
+    currentFcf: 12500,
+    growthRate5y: 8.0,
+    wacc: 12.0,
+    perpetualGrowth: 3.5,
+    netDebt: 14000,
+    sharesCount: 1300,
     marginOfSafety: 20,
-    currentPrice: 55.5,
+    currentPrice: 84.5,
   });
 
-  const [activePreset, setActivePreset] = useState<string>('VALE3 (Vale - B3)');
+  const [activePreset, setActivePreset] = useState<string>('ITUB4 (Itaú Unibanco)');
 
   const result = calculateDcf(params);
 
@@ -39,9 +39,9 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
   const handleReset = () => {
     setParams({
       currentFcf: 0,
-      growthRate5y: 5.0,
+      growthRate5y: 0,
       wacc: 12.0,
-      perpetualGrowth: 3.0,
+      perpetualGrowth: 3.5,
       netDebt: 0,
       sharesCount: 0,
       marginOfSafety: 20,
@@ -53,10 +53,10 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
   return (
     <div className="space-y-6">
       {/* Top Banner com Seletor de Exemplos */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/70 p-3.5 shadow-2xs backdrop-blur-xs dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
+          <span className="text-xs font-semibold text-zinc-300">
             Carregar exemplo real:
           </span>
         </div>
@@ -66,10 +66,10 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
               key={preset.ticker}
               type="button"
               onClick={() => handlePresetSelect(preset.ticker)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
                 activePreset === preset.ticker
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               {preset.ticker}
@@ -79,7 +79,7 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
             type="button"
             onClick={handleReset}
             title="Limpar campos"
-            className="flex items-center gap-1 rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-white/[0.08] hover:text-white transition-all"
           >
             <RotateCcw className="h-3 w-3" /> Limpar
           </button>
@@ -88,12 +88,12 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Formulário de Entradas */}
-        <div className="lg:col-span-7 space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-left">
-          <div className="border-b border-slate-100 pb-3 dark:border-slate-800">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+        <div className="lg:col-span-7 space-y-5 glass-card rounded-2xl p-6 text-left">
+          <div className="border-b border-white/[0.06] pb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
               Parâmetros do DCF Simplificado
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-zinc-400">
               Fluxo de Caixa Livre e Dívida na mesma escala (ex: milhões ou bilhões).
             </p>
           </div>
@@ -193,48 +193,48 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
 
           {/* Decomposição do Valor da Empresa */}
           {result.isApplicable && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-left space-y-3">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-2.5 dark:border-slate-800">
-                <Layers className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <div className="glass-card rounded-2xl p-5 text-left space-y-3">
+              <div className="flex items-center gap-2 border-b border-white/[0.06] pb-2.5">
+                <Layers className="h-4 w-4 text-emerald-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-white">
                   Pontes de Valor (Enterprise Value → Equity)
                 </span>
               </div>
 
-              <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300">
+              <div className="space-y-2 text-xs text-zinc-300">
                 <div className="flex justify-between">
-                  <span>VP dos Fluxos (Anos 1 a 5):</span>
-                  <span className="font-semibold">{formatNumber(result.sumPvFcf, 2)}</span>
+                  <span className="text-zinc-400">VP dos Fluxos (Anos 1 a 5):</span>
+                  <span className="font-semibold text-white">{formatNumber(result.sumPvFcf, 2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>VP do Valor Terminal:</span>
-                  <span className="font-semibold">{formatNumber(result.pvTerminalValue, 2)}</span>
+                  <span className="text-zinc-400">VP do Valor Terminal:</span>
+                  <span className="font-semibold text-white">{formatNumber(result.pvTerminalValue, 2)}</span>
                 </div>
-                <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-1">
-                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                <div className="flex justify-between border-t border-white/[0.06] pt-1">
+                  <span className="font-medium text-zinc-300">
                     Enterprise Value (EV):
                   </span>
-                  <span className="font-bold text-slate-900 dark:text-slate-100">
+                  <span className="font-bold text-white">
                     {formatNumber(result.enterpriseValue, 2)}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>(−) Dívida Líquida:</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
+                  <span className="text-zinc-400">(−) Dívida Líquida:</span>
+                  <span className="font-semibold text-rose-400">
                     {formatNumber(params.netDebt, 2)}
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-slate-200 dark:border-slate-700 pt-1.5 font-bold">
-                  <span className="text-emerald-700 dark:text-emerald-300">
+                <div className="flex justify-between border-t border-white/[0.06] pt-1.5 font-bold">
+                  <span className="text-emerald-400">
                     (=) Equity Value (Patrimônio Líquido):
                   </span>
-                  <span className="text-emerald-700 dark:text-emerald-300">
+                  <span className="text-emerald-400 font-black">
                     {formatNumber(result.equityValue, 2)}
                   </span>
                 </div>
-                <div className="flex justify-between text-slate-500 pt-1 text-[11px]">
+                <div className="flex justify-between text-zinc-400 pt-1 text-[11px]">
                   <span>Total de Ações:</span>
-                  <span>{formatNumber(params.sharesCount, 2)}</span>
+                  <span className="text-white font-mono">{formatNumber(params.sharesCount, 2)}</span>
                 </div>
               </div>
             </div>
@@ -242,34 +242,34 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
 
           {/* Tabela dos 5 Anos de Projeção */}
           {result.projections.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-left space-y-2.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-                <Calculator className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="glass-card rounded-2xl p-4 text-left space-y-2.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-white">
+                <Calculator className="h-4 w-4 text-emerald-400" />
                 <span>Projeção dos Próximos 5 Anos Descontados</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-[11px] text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 text-slate-500 dark:border-slate-800">
+                    <tr className="border-b border-white/[0.06] text-zinc-400 text-[10px] uppercase">
                       <th className="py-1">Ano</th>
                       <th className="py-1 text-right">FCF Projetado</th>
                       <th className="py-1 text-right">Fator Desc.</th>
                       <th className="py-1 text-right">Valor Presente</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                  <tbody className="divide-y divide-white/[0.04]">
                     {result.projections.map((p) => (
-                      <tr key={p.year} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                        <td className="py-1 font-semibold text-slate-700 dark:text-slate-300">
+                      <tr key={p.year} className="hover:bg-white/[0.02]">
+                        <td className="py-1 font-semibold text-white">
                           Ano {p.year}
                         </td>
-                        <td className="py-1 text-right text-slate-600 dark:text-slate-300">
+                        <td className="py-1 text-right text-zinc-300">
                           {formatNumber(p.fcf, 1)}
                         </td>
-                        <td className="py-1 text-right text-slate-400">
+                        <td className="py-1 text-right text-zinc-400 font-mono">
                           {formatNumber(p.discountFactor, 3)}
                         </td>
-                        <td className="py-1 text-right font-medium text-emerald-600 dark:text-emerald-400">
+                        <td className="py-1 text-right font-medium text-emerald-400">
                           {formatNumber(p.presentValue, 1)}
                         </td>
                       </tr>
@@ -285,7 +285,7 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
             author="Metodologia Tradicional de Valuation Corporativo"
             formula="Terminal = FCF₅ × (1 + g) ÷ (WACC − g) | EV = ∑VP(FCF₁..₅) + VP(Terminal)"
             explanation={
-              <div className="space-y-2">
+              <div className="space-y-2 text-zinc-300">
                 <p>
                   O modelo DCF em 2 estágios projeta o Fluxo de Caixa Livre para a Firma nos
                   primeiros 5 anos à taxa de crescimento $g_1$, e calcula o Valor Terminal
@@ -296,7 +296,7 @@ export const DcfCalculator: React.FC<DcfCalculatorProps> = ({ currency }) => {
                   <strong>WACC</strong>. Subtraindo a <strong>Dívida Líquida</strong>, obtém-se o{' '}
                   <strong>Equity Value</strong> disponível aos acionistas.
                 </p>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[10px] text-zinc-400">
                   <em>*Requisito matemático: O WACC deve ser superior à taxa de perpetuidade $g$ para convergência da fórmula de Gordon.</em>
                 </p>
               </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Currency, GreenblattParams } from '../../types/valuation';
-import { calculateGreenblatt, formatCurrency, formatNumber, formatPercent } from '../../utils/valuationCalculators';
+import { calculateGreenblatt, formatCurrency, formatPercent, formatNumber } from '../../utils/valuationCalculators';
 import { greenblattPresets } from '../../utils/presets';
 import { InputField } from '../ui/InputField';
 import { MarginSlider } from '../ui/MarginSlider';
@@ -13,18 +13,18 @@ interface GreenblattCalculatorProps {
 
 export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ currency }) => {
   const [params, setParams] = useState<GreenblattParams>({
-    ebit: 10500,
-    marketCap: 41000,
-    netDebt: 8200,
-    netWorkingCapital: 2100,
-    netFixedAssets: 18500,
-    sharesOutstanding: 885,
-    currentPrice: 46.3,
+    ebit: 8200,
+    marketCap: 45000,
+    netDebt: 6500,
+    netWorkingCapital: 4200,
+    netFixedAssets: 18000,
+    sharesOutstanding: 1200,
+    currentPrice: 37.5,
     targetMultipleEV_EBIT: 8.0,
     marginOfSafety: 20,
   });
 
-  const [activePreset, setActivePreset] = useState<string>('PRIO3 (PRIO - Prio S.A.)');
+  const [activePreset, setActivePreset] = useState<string>('VALE3 (Vale)');
 
   const result = calculateGreenblatt(params);
 
@@ -54,10 +54,10 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
   return (
     <div className="space-y-6">
       {/* Top Banner com Seletor de Exemplos */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/70 p-3.5 shadow-2xs backdrop-blur-xs dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
+          <span className="text-xs font-semibold text-zinc-300">
             Carregar exemplo real:
           </span>
         </div>
@@ -67,10 +67,10 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
               key={preset.ticker}
               type="button"
               onClick={() => handlePresetSelect(preset.ticker)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
                 activePreset === preset.ticker
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               {preset.ticker}
@@ -80,7 +80,7 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
             type="button"
             onClick={handleReset}
             title="Limpar campos"
-            className="flex items-center gap-1 rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-white/[0.08] hover:text-white transition-all"
           >
             <RotateCcw className="h-3 w-3" /> Limpar
           </button>
@@ -89,12 +89,12 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Formulário de Entradas */}
-        <div className="lg:col-span-7 space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-left">
-          <div className="border-b border-slate-100 pb-3 dark:border-slate-800">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+        <div className="lg:col-span-7 space-y-5 glass-card rounded-2xl p-6 text-left">
+          <div className="border-b border-white/[0.06] pb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
               Parâmetros da Fórmula Mágica
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-zinc-400">
               Valores em milhões ({currency === 'BRL' ? 'R$' : 'US$'}), exceto cotação.
             </p>
           </div>
@@ -188,67 +188,67 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
         {/* Painel de Resultados */}
         <div className="lg:col-span-5 space-y-5">
           {/* Métricas Principais da Fórmula Mágica */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-left space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          <div className="glass-card rounded-2xl p-5 text-left space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-white">
                 Pilares da Fórmula Mágica
               </span>
-              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                Greenblatt
+              <span className="text-xs font-bold text-emerald-400">
+                Joel Greenblatt
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Earnings Yield */}
-              <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4 dark:border-blue-500/30 dark:bg-blue-950/20">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-blue-700 dark:text-blue-300">
+              <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-4">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-cyan-400">
                   <Percent className="h-4 w-4" /> Earnings Yield
                 </div>
-                <div className="mt-2 text-2xl font-black text-blue-800 dark:text-blue-200">
+                <div className="mt-2 text-2xl font-black text-cyan-300">
                   {formatPercent(result.earningsYield)}
                 </div>
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-[10px] text-zinc-400">
                   EBIT ÷ EV (Rendimento Operacional)
                 </p>
               </div>
 
               {/* ROIC */}
-              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 dark:border-emerald-500/30 dark:bg-emerald-950/20">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300">
+              <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
                   <Activity className="h-4 w-4" /> ROIC Tangível
                 </div>
-                <div className="mt-2 text-2xl font-black text-emerald-800 dark:text-emerald-200">
+                <div className="mt-2 text-2xl font-black text-emerald-300">
                   {result.roic !== null ? formatPercent(result.roic) : '—'}
                 </div>
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-[10px] text-zinc-400">
                   EBIT ÷ (Giro Líq + Imobilizado)
                 </p>
               </div>
             </div>
 
             {/* Enterprise Value & Capital */}
-            <div className="space-y-2 text-xs text-slate-600 dark:text-slate-300 border-t border-slate-100 pt-3 dark:border-slate-800">
+            <div className="space-y-2 text-xs text-zinc-300 border-t border-white/[0.06] pt-3">
               <div className="flex justify-between">
-                <span>Enterprise Value (EV = MktCap + Dívida):</span>
-                <span className="font-semibold">{formatNumber(result.ev, 0)} mi</span>
+                <span className="text-zinc-400">Enterprise Value (EV = MktCap + Dívida):</span>
+                <span className="font-semibold text-white">{formatNumber(result.ev, 0)} mi</span>
               </div>
               <div className="flex justify-between">
-                <span>Capital Tangível Investido:</span>
-                <span className="font-semibold">{formatNumber(result.tangibleCapitalEmployed, 0)} mi</span>
+                <span className="text-zinc-400">Capital Tangível Investido:</span>
+                <span className="font-semibold text-white">{formatNumber(result.tangibleCapitalEmployed, 0)} mi</span>
               </div>
             </div>
 
             {/* Preço Justo Estimado se parâmetros fornecidos */}
             {result.ceilingPrice && result.ceilingPrice > 0 && (
-              <div className="rounded-xl bg-slate-50 p-4 border border-slate-200/60 dark:bg-slate-800/50 dark:border-slate-700/60 space-y-2">
-                <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <div className="rounded-xl bg-white/[0.03] p-4 border border-white/[0.08] space-y-2">
+                <div className="text-[11px] font-semibold text-zinc-400">
                   Preço Teto Estimado (EV/EBIT {params.targetMultipleEV_EBIT}x):
                 </div>
-                <div className="text-2xl font-black text-slate-900 dark:text-white">
+                <div className="text-2xl font-black text-white">
                   {formatCurrency(result.ceilingPrice, currency)}
                 </div>
-                <div className="flex justify-between text-xs text-emerald-700 dark:text-emerald-400">
-                  <span>Com Margem ({params.marginOfSafety}%):</span>
+                <div className="flex justify-between text-xs text-emerald-400">
+                  <span className="text-zinc-400">Com Margem ({params.marginOfSafety}%):</span>
                   <span className="font-bold">
                     {formatCurrency(result.buyPriceWithMargin, currency)}
                   </span>
@@ -262,7 +262,7 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
             author="Joel Greenblatt (The Little Book That Beats the Market)"
             formula="Rank(Earnings Yield) + Rank(ROIC) = Ranking Final (Menor Soma = Melhor)"
             explanation={
-              <div className="space-y-2">
+              <div className="space-y-2 text-zinc-300">
                 <p>
                   Joel Greenblatt comprovou que comprar <strong>empresas boas</strong>{' '}
                   (alto ROIC sobre o capital tangível) a <strong>preços pechincha</strong>{' '}
@@ -277,7 +277,7 @@ export const GreenblattCalculator: React.FC<GreenblattCalculatorProps> = ({ curr
                   eficiência com que o capital tangível de fato necessário para operar a
                   empresa gera resultado.
                 </p>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[10px] text-zinc-400">
                   <em>*Greenblatt exclui instituições financeiras e bancos por terem estruturas de capital distintas.</em>
                 </p>
               </div>

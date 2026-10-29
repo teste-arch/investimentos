@@ -38,16 +38,14 @@ export const InputField: React.FC<InputFieldProps> = ({
     <div className="flex flex-col space-y-1.5 text-left">
       <label
         htmlFor={id}
-        className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300"
+        className="text-[11px] font-bold uppercase tracking-wider text-zinc-300"
       >
         {label}
       </label>
-      <div className="relative rounded-lg shadow-xs">
+      <div className="relative rounded-xl shadow-xs">
         {prefix && (
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              {prefix}
-            </span>
+            <span className="text-xs font-semibold text-zinc-400">{prefix}</span>
           </div>
         )}
         <input
@@ -60,24 +58,20 @@ export const InputField: React.FC<InputFieldProps> = ({
           step={step}
           placeholder={placeholder}
           disabled={disabled}
-          className={`block w-full rounded-lg border border-slate-300 bg-white py-2 text-sm text-slate-900 transition-colors focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-emerald-400 ${
+          className={`block w-full rounded-xl border border-white/[0.08] bg-[#12141d] py-2 text-sm font-semibold text-white transition-colors focus:border-white/30 focus:outline-hidden focus:ring-1 focus:ring-white/20 ${
             prefix ? 'pl-9' : 'pl-3'
           } ${suffix ? 'pr-9' : 'pr-3'} ${
-            disabled ? 'cursor-not-allowed opacity-60 bg-slate-100 dark:bg-slate-800' : ''
+            disabled ? 'cursor-not-allowed opacity-50 bg-white/[0.02]' : ''
           }`}
         />
         {suffix && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-            <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              {suffix}
-            </span>
+            <span className="text-xs font-semibold text-zinc-400">{suffix}</span>
           </div>
         )}
       </div>
       {helpText && (
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-          {helpText}
-        </p>
+        <p className="text-[10px] text-zinc-400 leading-tight">{helpText}</p>
       )}
     </div>
   );

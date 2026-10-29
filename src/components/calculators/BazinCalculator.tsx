@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Currency, BazinParams } from '../../types/valuation';
-import { calculateBazin, formatCurrency, formatPercent } from '../../utils/valuationCalculators';
+import { calculateBazin } from '../../utils/valuationCalculators';
 import { bazinPresets } from '../../utils/presets';
 import { InputField } from '../ui/InputField';
 import { MarginSlider } from '../ui/MarginSlider';
@@ -48,10 +48,10 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
   return (
     <div className="space-y-6">
       {/* Top Banner com Seletor de Exemplos */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-white/70 p-3.5 shadow-2xs backdrop-blur-xs dark:border-slate-800 dark:bg-slate-900/60">
+      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-left">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          <Sparkles className="h-4 w-4 text-emerald-400 shrink-0" />
+          <span className="text-xs font-semibold text-zinc-300">
             Carregar exemplo real:
           </span>
         </div>
@@ -61,10 +61,10 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
               key={preset.ticker}
               type="button"
               onClick={() => handlePresetSelect(preset.ticker)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+              className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition-all ${
                 activePreset === preset.ticker
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white'
               }`}
             >
               {preset.ticker}
@@ -74,7 +74,7 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
             type="button"
             onClick={handleReset}
             title="Limpar campos"
-            className="flex items-center gap-1 rounded-lg border border-slate-300 px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.02] px-2.5 py-1.5 text-xs text-zinc-400 hover:bg-white/[0.08] hover:text-white transition-all"
           >
             <RotateCcw className="h-3 w-3" /> Limpar
           </button>
@@ -83,29 +83,29 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Formulário de Entradas */}
-        <div className="lg:col-span-7 space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900 text-left">
-          <div className="border-b border-slate-100 pb-3 dark:border-slate-800">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+        <div className="lg:col-span-7 space-y-5 glass-card rounded-2xl p-6 text-left">
+          <div className="border-b border-white/[0.06] pb-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
               Parâmetros de Entrada
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-zinc-400">
               Insira o histórico de proventos e a taxa de retorno em dividendos desejada.
             </p>
           </div>
 
           {/* Tipo de Provento */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-300">
               Base dos Dividendos
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setParams({ ...params, dividendType: '12m' })}
-                className={`rounded-lg py-2 text-xs font-semibold transition-all ${
+                className={`rounded-xl py-2 text-xs font-semibold transition-all ${
                   params.dividendType === '12m'
-                    ? 'border-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                    ? 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                    : 'border border-white/10 bg-white/[0.02] text-zinc-400 hover:bg-white/[0.06] hover:text-white'
                 }`}
               >
                 Últimos 12 Meses
@@ -113,19 +113,19 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
               <button
                 type="button"
                 onClick={() => setParams({ ...params, dividendType: '5y_avg' })}
-                className={`rounded-lg py-2 text-xs font-semibold transition-all ${
+                className={`rounded-xl py-2 text-xs font-semibold transition-all ${
                   params.dividendType === '5y_avg'
-                    ? 'border-2 border-emerald-500 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                    : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                    ? 'border border-emerald-500/40 bg-emerald-500/10 text-emerald-400'
+                    : 'border border-white/10 bg-white/[0.02] text-zinc-400 hover:bg-white/[0.06] hover:text-white'
                 }`}
               >
                 Média de 5 Anos
               </button>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            <p className="text-[10px] text-zinc-400">
               {params.dividendType === '12m'
                 ? 'Soma de todos os dividendos e JCP pagos por ação nos últimos 12 meses.'
-                : 'Média aritmética anual dos proventos pagos nos últimos 5 anos (suaviza oscilações cíclicas).'}
+                : 'Média aritmética anual dos proventos pagos nos últimos 5 anos.'}
             </p>
           </div>
 
@@ -140,27 +140,30 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
               value={params.dividendPerShare}
               onChange={(val) => setParams({ ...params, dividendPerShare: val })}
               prefix={currency === 'BRL' ? 'R$' : '$'}
+              placeholder="0,00"
               helpText="Proventos pagos por ação no período selecionado."
             />
 
             <InputField
-              id="bazin-target-yield"
-              label="Dividend Yield Mínimo Exigido"
+              id="bazin-yield"
+              label="Yield Mínimo Desejado"
               value={params.targetYield}
               onChange={(val) => setParams({ ...params, targetYield: val })}
               suffix="%"
-              step={0.1}
-              helpText="Padrão Bazin: 6,0% a.a. (ajuste para 3% ou 4% em ações americanas)."
+              placeholder="6,0"
+              step={0.5}
+              helpText="Taxa de corte de Décio Bazin (6,0% padrão B3)."
             />
           </div>
 
           <InputField
-            id="bazin-current-price"
-            label="Cotação Atual da Ação"
-            value={params.currentPrice || ''}
+            id="bazin-price"
+            label="Cotação Atual de Mercado (Opcional)"
+            value={params.currentPrice || 0}
             onChange={(val) => setParams({ ...params, currentPrice: val })}
             prefix={currency === 'BRL' ? 'R$' : '$'}
-            helpText="Opcional. Usado para calcular o Upside/Downside e status de oportunidade."
+            placeholder="0,00"
+            helpText="Informe o preço de tela para cálculo de potencial (upside)."
           />
 
           <MarginSlider
@@ -169,7 +172,7 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
           />
         </div>
 
-        {/* Painel de Resultados */}
+        {/* Painel Lateral com Resultado e Metodologia */}
         <div className="lg:col-span-5 space-y-5">
           <ResultDisplay
             ceilingPrice={result.ceilingPrice}
@@ -181,58 +184,28 @@ export const BazinCalculator: React.FC<BazinCalculatorProps> = ({ currency }) =>
             isApplicable={result.isApplicable}
             notApplicableMessage={result.notes}
             currency={currency}
-            title="Preço Teto de Bazin"
+            title="Preço Teto — Décio Bazin"
           />
-
-          {/* Card com Detalhamento Matemático */}
-          {result.isApplicable && (
-            <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 text-left space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                Resumo dos Cálculos
-              </span>
-              <div className="text-xs space-y-1.5 text-slate-700 dark:text-slate-300">
-                <div className="flex justify-between">
-                  <span>Provento por Ação (DPA):</span>
-                  <span className="font-semibold">{formatCurrency(params.dividendPerShare, currency)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Yield Exigido:</span>
-                  <span className="font-semibold">{formatPercent(params.targetYield)}</span>
-                </div>
-                <div className="flex justify-between border-t border-slate-100 dark:border-slate-800 pt-1">
-                  <span>Preço Teto (DPA ÷ Taxa):</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(result.ceilingPrice, currency)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Preço c/ Margem ({params.marginOfSafety}%):</span>
-                  <span className="font-bold text-emerald-700 dark:text-emerald-300">
-                    {formatCurrency(result.buyPriceWithMargin, currency)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
 
           <FormulaCard
             title="Preço Teto de Décio Bazin"
             author="Décio Bazin (Faça Fortuna com Ações)"
-            formula="Preço Teto = Dividendo por Ação (DPA) ÷ Taxa Exigida (ex: 0,06)"
+            formula="Preço Teto = DPA / Yield Desejado (ex: DPA / 0,06)"
             explanation={
-              <div className="space-y-2">
+              <div className="space-y-2 text-zinc-300">
                 <p>
-                  O jornalista e investidor Décio Bazin estabeleceu que só vale a pena
-                  comprar ações que paguem pelo menos <strong>6% ao ano em dividendos</strong>{' '}
-                  sobre o preço pago.
+                  O método de Décio Bazin visa identificar empresas boas pagadoras de
+                  dividendos que estejam sendo negociadas a preços que garantam um retorno mínimo
+                  de 6% ao ano apenas em proventos.
                 </p>
                 <p>
-                  Se a cotação estiver abaixo do Preço Teto, a empresa entregará mais de 6%
-                  de Dividend Yield considerando os dividendos projetados.
+                  <strong>Regras de Ouro de Bazin:</strong>
                 </p>
-                <p className="text-emerald-600 dark:text-emerald-400 font-medium">
-                  Preço Limite de Compra com Margem = Preço Teto × (1 − Margem de Segurança%).
-                </p>
+                <ul className="list-disc pl-4 space-y-1 text-zinc-400">
+                  <li>Yield mínimo de 6% sobre o preço pago.</li>
+                  <li>Endividamento equilibrado (Dívida Líq / EBITDA moderada).</li>
+                  <li>Evitar empresas sem histórico consistente de proventos.</li>
+                </ul>
               </div>
             }
           />

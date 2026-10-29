@@ -15,6 +15,7 @@ import type {
   MarketParameters,
   ProviderItem,
 } from '../../services/api';
+import { ScreenerExecutiveSummary } from './ScreenerExecutiveSummary';
 import { ScreenerFilters } from './ScreenerFilters';
 import { ScreenerTable } from './ScreenerTable';
 import { AddTickerModal } from './AddTickerModal';
@@ -78,7 +79,11 @@ export const ScreenerView: React.FC<ScreenerViewProps> = ({ onSelectForManualCal
         if (res.marketParams) setMarketParams(res.marketParams);
       }
     } catch (err: any) {
-      setError('Não foi possível conectar ao servidor backend da API.');
+      if (err.message?.includes('401')) {
+        setError('Sessão expirada ou não autenticada. Atualize a página para digitar a senha.');
+      } else {
+        setError('Não foi possível conectar ao servidor backend da API.');
+      }
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -181,14 +186,21 @@ export const ScreenerView: React.FC<ScreenerViewProps> = ({ onSelectForManualCal
   const exampleCount = stocks.filter((s) => s.isExampleData).length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Mensagem de Erro de Conexão */}
       {error && (
-        <div className="flex items-center gap-2 rounded-2xl border border-rose-300 bg-rose-50 p-4 text-xs font-semibold text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300">
-          <AlertCircle className="h-5 w-5 shrink-0" />
+        <div className="flex items-center gap-2 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300">
+          <AlertCircle className="h-5 w-5 shrink-0 text-rose-400" />
           <span>{error} — Verifique se o servidor backend está ativo na porta 3001.</span>
         </div>
       )}
+
+      {/* Visão Executiva: KPI Cards & Destaques de Mercado (Inspired by Images 1, 2, 3) */}
+      <ScreenerExecutiveSummary
+        stocks={stocks}
+        rankingCriterion={ranking}
+        onSelectStock={onSelectForManualCalc}
+      />
 
       {/* Controles de Filtros e Busca */}
       <ScreenerFilters
@@ -224,9 +236,9 @@ export const ScreenerView: React.FC<ScreenerViewProps> = ({ onSelectForManualCal
 
       {/* Tabela de Rankings */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center p-16 text-slate-500">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mb-2" />
-          <span className="text-xs font-semibold">Carregando cotações e rankings...</span>
+        <div className="flex flex-col items-center justify-center p-20 text-zinc-400">
+          <Loader2 className="h-8 w-8 animate-spin text-emerald-400 mb-2" />
+          <span className="text-xs font-semibold">Carregando cotações e rankings quantitativos...</span>
         </div>
       ) : (
         <ScreenerTable

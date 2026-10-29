@@ -96,6 +96,17 @@ export interface ProviderItem {
   isActive: boolean;
 }
 
+function getAuthHeaders(): Record<string, string> {
+  const token = sessionStorage.getItem('screener_auth_token');
+  if (token) {
+    return {
+      Authorization: `Bearer ${token}`,
+      'x-screener-token': token,
+    };
+  }
+  return {};
+}
+
 export async function fetchStocks(params: {
   market?: string;
   ranking?: string;
@@ -120,19 +131,27 @@ export async function fetchStocks(params: {
     query.set('minLiquidity', String(params.minLiquidity));
   if (params.excludeFinancials) query.set('excludeFinancials', 'true');
 
-  const res = await fetch(`/api/stocks?${query.toString()}`);
+  const res = await fetch(`/api/stocks?${query.toString()}`, {
+    headers: { ...getAuthHeaders() },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 export async function refreshAllStocks(): Promise<{ success: boolean; message: string }> {
-  const res = await fetch('/api/stocks/refresh-all', { method: 'POST' });
+  const res = await fetch('/api/stocks/refresh-all', {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 export async function refreshTicker(ticker: string): Promise<{ success: boolean; message: string; stock: ApiStockItem }> {
-  const res = await fetch(`/api/stocks/refresh-ticker/${ticker}`, { method: 'POST' });
+  const res = await fetch(`/api/stocks/refresh-ticker/${ticker}`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders() },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -149,7 +168,7 @@ export async function addWatchlistTicker(payload: {
 }): Promise<{ success: boolean; message: string }> {
   const res = await fetch('/api/stocks/watchlist', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
@@ -160,7 +179,10 @@ export async function addWatchlistTicker(payload: {
 }
 
 export async function removeWatchlistTicker(ticker: string): Promise<{ success: boolean; message: string }> {
-  const res = await fetch(`/api/stocks/watchlist/${ticker}`, { method: 'DELETE' });
+  const res = await fetch(`/api/stocks/watchlist/${ticker}`, {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -168,7 +190,7 @@ export async function removeWatchlistTicker(ticker: string): Promise<{ success: 
 export async function updateMarketParams(params: Partial<MarketParameters>): Promise<{ success: boolean; message: string }> {
   const res = await fetch('/api/stocks/params', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
     body: JSON.stringify(params),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -180,13 +202,18 @@ export async function fetchProviders(): Promise<{
   providers: ProviderItem[];
   stats: ApiUsageStats;
 }> {
-  const res = await fetch('/api/stocks/providers');
+  const res = await fetch('/api/stocks/providers', {
+    headers: { ...getAuthHeaders() },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
 
 export async function clearExampleStocks(): Promise<{ success: boolean; message: string }> {
-  const res = await fetch('/api/stocks/clear-examples', { method: 'DELETE' });
+  const res = await fetch('/api/stocks/clear-examples', {
+    method: 'DELETE',
+    headers: { ...getAuthHeaders() },
+  });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }

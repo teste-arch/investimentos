@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import { Redis } from '@upstash/redis';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { StockData, ApiUsageStats } from '../providers/types';
 import { defaultWatchlist } from '../config/defaultWatchlist';
@@ -12,7 +11,7 @@ const STATS_FILE = path.join(DATA_DIR, 'api_usage.json');
 const PARAMS_FILE = path.join(DATA_DIR, 'params.json');
 
 export interface StorageAdapter {
-  type: 'redis' | 'supabase' | 'local';
+  type: 'supabase' | 'local';
   loadStocks(): Promise<StockData[]>;
   saveStocks(stocks: StockData[]): Promise<void>;
   loadStats(): Promise<ApiUsageStats | null>;
@@ -22,78 +21,22 @@ export interface StorageAdapter {
 }
 
 /**
- * 1. Adaptador Upstash Redis (Vercel KV / Upstash - 100% Serverless via REST HTTP)
- */
-class RedisStorageAdapter implements StorageAdapter {
-  public type: 'redis' = 'redis';
-  private redis: Redis;
-
-  constructor(url: string, token: string) {
-    this.redis = new Redis({ url, token });
-  }
-
-  async loadStocks(): Promise<StockData[]> {
-    try {
-      const data = await this.redis.get<StockData[]>('screener:stocks');
-      if (Array.isArray(data) && data.length > 0) return data;
-    } catch (e) {
-      console.error('[RedisStorage] Erro ao carregar screener:stocks:', e);
-    }
-    return defaultWatchlist;
-  }
-
-  async saveStocks(stocks: StockData[]): Promise<void> {
-    try {
-      await this.redis.set('screener:stocks', stocks);
-    } catch (e) {
-      console.error('[RedisStorage] Erro ao salvar screener:stocks:', e);
-    }
-  }
-
-  async loadStats(): Promise<ApiUsageStats | null> {
-    try {
-      return await this.redis.get<ApiUsageStats>('screener:stats');
-    } catch (e) {
-      console.error('[RedisStorage] Erro ao carregar screener:stats:', e);
-      return null;
-    }
-  }
-
-  async saveStats(stats: ApiUsageStats): Promise<void> {
-    try {
-      await this.redis.set('screener:stats', stats);
-    } catch (e) {
-      console.error('[RedisStorage] Erro ao salvar screener:stats:', e);
-    }
-  }
-
-  async loadParams(): Promise<MarketParameters | null> {
-    try {
-      return await this.redis.get<MarketParameters>('screener:params');
-    } catch (e) {
-      console.error('[RedisStorage] Erro ao carregar screener:params:', e);
-      return null;
-    }
-  }
-
-  async saveParams(params: MarketParameters): Promise<void> {
-    try {
-      await this.redis.set('screener:params', params);
-    } catch (e) {
-      console.error('[RedisStorage] Erro ao salvar screener:params:', e);
-    }
-  }
-}
-
-/**
- * 2. Adaptador Supabase (PostgreSQL via REST - 100% Serverless)
+ * 1. Adaptador Supabase (PostgreSQL via REST - 100% Serverless)
+ * Utiliza as variáveis nativas da integração da Vercel:
+ * - URL: SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_URL
+ * - Chave Secreta: SUPABASE_SECRET_KEY ou SUPABASE_SERVICE_ROLE_KEY (bypassa RLS no servidor)
  */
 class SupabaseStorageAdapter implements StorageAdapter {
   public type: 'supabase' = 'supabase';
   private client: SupabaseClient;
 
   constructor(url: string, key: string) {
-    this.client = createClient(url, key);
+    this.client = createClient(url, key, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
   }
 
   async loadStocks(): Promise<StockData[]> {
@@ -102,9 +45,14 @@ class SupabaseStorageAdapter implements StorageAdapter {
         .from('screener_kv')
         .select('value')
         .eq('key', 'stocks')
-        .single();
+        .maybeSingle();
 
-      if (!error && data?.value && Array.isArray(data.value)) {
+      if (error) {
+        console.warn('[SupabaseStorage] Aviso ao buscar stocks:', error.message);
+        return defaultWatchlist;
+      }
+
+      if (data?.value && Array.isArray(data.value) && data.value.length > 0) {
         return data.value;
       }
     } catch (e) {
@@ -115,11 +63,18 @@ class SupabaseStorageAdapter implements StorageAdapter {
 
   async saveStocks(stocks: StockData[]): Promise<void> {
     try {
-      await this.client
+      const { error } = await this.client
         .from('screener_kv')
-        .upsert({ key: 'stocks', value: stocks, updated_at: new Date().toISOString() });
+        .upsert(
+          { key: 'stocks', value: stocks, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+
+      if (error) {
+        console.error('[SupabaseStorage] Erro ao salvar stocks:', error.message);
+      }
     } catch (e) {
-      console.error('[SupabaseStorage] Erro ao salvar stocks:', e);
+      console.error('[SupabaseStorage] Exceção ao salvar stocks:', e);
     }
   }
 
@@ -129,8 +84,14 @@ class SupabaseStorageAdapter implements StorageAdapter {
         .from('screener_kv')
         .select('value')
         .eq('key', 'stats')
-        .single();
-      if (!error && data?.value) return data.value;
+        .maybeSingle();
+
+      if (error) {
+        console.warn('[SupabaseStorage] Aviso ao buscar stats:', error.message);
+        return null;
+      }
+
+      if (data?.value) return data.value;
     } catch (e) {
       console.error('[SupabaseStorage] Erro ao carregar stats:', e);
     }
@@ -139,11 +100,18 @@ class SupabaseStorageAdapter implements StorageAdapter {
 
   async saveStats(stats: ApiUsageStats): Promise<void> {
     try {
-      await this.client
+      const { error } = await this.client
         .from('screener_kv')
-        .upsert({ key: 'stats', value: stats, updated_at: new Date().toISOString() });
+        .upsert(
+          { key: 'stats', value: stats, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+
+      if (error) {
+        console.error('[SupabaseStorage] Erro ao salvar stats:', error.message);
+      }
     } catch (e) {
-      console.error('[SupabaseStorage] Erro ao salvar stats:', e);
+      console.error('[SupabaseStorage] Exceção ao salvar stats:', e);
     }
   }
 
@@ -153,8 +121,14 @@ class SupabaseStorageAdapter implements StorageAdapter {
         .from('screener_kv')
         .select('value')
         .eq('key', 'params')
-        .single();
-      if (!error && data?.value) return data.value;
+        .maybeSingle();
+
+      if (error) {
+        console.warn('[SupabaseStorage] Aviso ao buscar params:', error.message);
+        return null;
+      }
+
+      if (data?.value) return data.value;
     } catch (e) {
       console.error('[SupabaseStorage] Erro ao carregar params:', e);
     }
@@ -163,17 +137,24 @@ class SupabaseStorageAdapter implements StorageAdapter {
 
   async saveParams(params: MarketParameters): Promise<void> {
     try {
-      await this.client
+      const { error } = await this.client
         .from('screener_kv')
-        .upsert({ key: 'params', value: params, updated_at: new Date().toISOString() });
+        .upsert(
+          { key: 'params', value: params, updated_at: new Date().toISOString() },
+          { onConflict: 'key' }
+        );
+
+      if (error) {
+        console.error('[SupabaseStorage] Erro ao salvar params:', error.message);
+      }
     } catch (e) {
-      console.error('[SupabaseStorage] Erro ao salvar params:', e);
+      console.error('[SupabaseStorage] Exceção ao salvar params:', e);
     }
   }
 }
 
 /**
- * 3. Adaptador Local com Fallback em Memória (seguro para Vercel se nenhuma chave externa estiver setada)
+ * 2. Adaptador Local com Fallback em Memória (seguro para Vercel se o Supabase ainda não estiver conectado)
  */
 class LocalOrMemoryStorageAdapter implements StorageAdapter {
   public type: 'local' = 'local';
@@ -285,19 +266,18 @@ class LocalOrMemoryStorageAdapter implements StorageAdapter {
 }
 
 /**
- * Fábrica do Adaptador de Armazenamento Inteligente
+ * Fábrica do Adaptador de Armazenamento
+ * Prioriza o Supabase com as variáveis injetadas automaticamente pela integração da Vercel:
+ * 1. URL: SUPABASE_URL ou NEXT_PUBLIC_SUPABASE_URL
+ * 2. Chave: SUPABASE_SECRET_KEY ou SUPABASE_SERVICE_ROLE_KEY (bypassa RLS) ou SUPABASE_ANON_KEY
  */
 export function createStorageAdapter(): StorageAdapter {
-  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
-  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (redisUrl && redisToken) {
-    console.log('[StorageAdapter] Utilizando Upstash Redis como armazenamento externo.');
-    return new RedisStorageAdapter(redisUrl, redisToken);
-  }
-
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.SUPABASE_SECRET_KEY ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (supabaseUrl && supabaseKey) {
     console.log('[StorageAdapter] Utilizando Supabase como armazenamento externo.');

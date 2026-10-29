@@ -5,6 +5,7 @@ import { stocksRouter } from './routes/stocks';
 import { authRouter } from './routes/auth';
 import { cronRouter } from './routes/cron';
 import { cacheManager } from './storage/cacheManager';
+import { requireAuth } from './middleware/authMiddleware';
 
 dotenv.config();
 
@@ -25,7 +26,8 @@ app.use(async (_req, _res, next) => {
 });
 
 // Rotas da API
-app.use('/api/stocks', stocksRouter);
+// /api/stocks exige sessão autenticada se SITE_PASSWORD estiver configurada
+app.use('/api/stocks', requireAuth, stocksRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/cron', cronRouter);
 
